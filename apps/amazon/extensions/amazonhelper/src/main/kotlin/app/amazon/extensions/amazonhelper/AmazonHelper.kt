@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Adapted from rushiranpise/morphe-patches Amazon patch sources.
 @file:JvmName("AmazonHelper")
 @file:Suppress("unused")
 
