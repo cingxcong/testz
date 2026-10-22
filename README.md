@@ -1,74 +1,42 @@
-<p align="center">
-  <img src="https://reseam.app/logo.svg" alt="Reseam logo" width="96">
-</p>
+# Amazon Reseam patches
 
-<h1 align="center">Reseam patch bundle template</h1>
+Amazon Shopping patches ported from [rushiranpise/morphe-patches](https://github.com/rushiranpise/morphe-patches/tree/main/patches/src/main/kotlin/app/template/patches/amazon) to the Reseam patch API.
 
-Start here to write your own patches for [Reseam](https://reseam.app). Copy this repository, rename a few things, and you have a bundle that builds, signs itself, and publishes releases Reseam Manager can install.
+## Included patches
 
-It ships two example patches that work on any app:
+- **Remove ads** — hides a focused set of sponsored cards and promotional slots with injected CSS.
+- **Hide Rufus tab** — forces the Rufus bottom-navigation gate off.
+- **Dark mode** — applies dark CSS when Android system dark mode is active and tints tab icons.
+- **Disable video autoplay** — requires user interaction before WebView media playback.
+- **Disable search suggestions tracking** — drops the suggestion builder's event field.
+- **Open links in browser** — routes non-Amazon HTTP(S) links to the external browser; malformed and non-web URLs fail closed.
+- **Price history charts** — adds a product-page section and loads Keepa/CamelCamelCamel charts only after the user taps the button.
+- **Fix Amazon manifest conflicts** — namespaces declared permissions and updates references.
 
-- `Enable debugging` edits the manifest.
-- `Allow screenshots` redirects calls into Kotlin code shipped in the bundle (an extension).
+Both `com.amazon.mShop.android.shopping` and `in.amazon.mShop.android.shopping` are declared as compatible package names.
 
-The [docs](https://reseam.app/docs/authoring/start/) walk through this template step by step.
+## Build
 
-## Setup
+The repository uses the Reseam workspace plugin version pinned in `settings.gradle.kts`.
 
-- JDK 17.
-- Android SDK, with `ANDROID_HOME` pointing at it.
-- The `reseam` CLI, on `PATH` or at the path in `RESEAM_BIN`. Use the version that matches the plugin version in `settings.gradle.kts`. Releases ship Linux x64 and Windows x64 binaries; on other platforms [build it from source](https://reseam.app/docs/cli/install/).
-- A signing key: `reseam bundle keygen --out ~/.reseam/bundle-signing.key`. It prints the public key users will trust. Keep the key file private and out of the repository.
-
-## Make it yours
-
-1. Set `name`, `author`, and `description` in `manifest.toml`, and `rootProject.name` in `settings.gradle.kts`.
-2. Rename `apps/example` to the app you patch and change the `app.example` packages to your own.
-3. Replace the example patches with your own.
-
-Layout:
-
-```text
-manifest.toml                     bundle name, author, description
-settings.gradle.kts               Reseam plugin version
-apps/<app>/patch/                 Kotlin patches, one module per app
-apps/<app>/extensions/<name>/     Kotlin code injected into the app
-apps/<app>/settings/              in-app settings and translated strings (optional)
-shared/<name>/                    extensions used by more than one app
-```
-
-Modules need no build script. The `app.reseam.workspace` plugin configures them from the layout. How to write patches is in [Your first patch](https://reseam.app/docs/authoring/first_patch/).
-
-## Build and test
-
-```shell
+```sh
 ./gradlew bundle
-reseam bundle list build/reseam/example-patches.reseam
-reseam patch app.apk \
-  --bundle build/reseam/example-patches.reseam \
-  --trust <public key> \
-  --enable "Enable debugging" \
-  --output patched.apk
 ```
 
-## Release
+The resulting bundle should be written under `build/reseam/`. The CLI version and a signing key must match the Reseam workspace requirements; see the [Reseam authoring docs](https://reseam.app/docs/authoring/start/).
 
-The workflow in `.github/workflows/release.yml` runs on `v*` tags, on GitHub and on Forgejo, including Codeberg. It builds and signs the bundle, then [`reseam release patches`](https://reseam.app/docs/cli/release/) adds the release to the `patches.json` of your latest release with the commit subjects since the previous tag as its notes, and publishes both on a release.
+## Porting notes
 
-1. Add the signing key as the repository secret `BUNDLE_SIGNING_KEY_B64`: `base64 -w0 ~/.reseam/bundle-signing.key`.
-2. On Forgejo, set the repository variable `RUNNER` to the label of a runner with Java and Node.js. GitHub uses `ubuntu-latest`.
-3. Push a tag: `git tag v0.1.0 && git push origin v0.1.0`.
+This is a source-level port; it has **not been validated against an Amazon APK**. The target method descriptions are based on the supplied Morphe source, so exact resolution still depends on the Amazon build being patched. No APK was needed for this source port.
 
-Share your patch source with this link. It opens Reseam Manager, which shows the source's apps, patches and signing key before adding it, and keeps it up to date from your latest release. Every release lists the link too.
+Some options and implementation details from the Morphe version are simplified:
+- Dark mode follows Android's system setting rather than exposing Off / Follow system / Always on options.
+- The ad-block selector set is a smaller curated subset.
+- Price charts use a fixed one-year view and don't expose the Morphe chart options.
+- Price-history provider requests happen only after the user explicitly taps Load.
 
-```text
-https://reseam.app/add/?url=https%3A%2F%2Fgithub.com%2F<owner>%2F<repo>
-```
+## Attribution and licensing
 
-Without Reseam Manager, the link opens a page with the steps to add the source. Publish your public key where users can check it against the one Reseam Manager shows.
+The patch behavior was adapted from [Morphe Amazon patches](https://github.com/rushiranpise/morphe-patches/tree/main/patches/src/main/kotlin/app/template/patches/amazon). The ad selectors and dark-mode CSS are inspired by and partially derived from [amznkiller](https://github.com/hxreborn/amznkiller) by hxreborn (GPL-3.0). The upstream Morphe README contains further attribution details.
 
-When you move to a new Reseam version, bump the plugin version in `settings.gradle.kts`. The release workflow downloads the CLI of that same version.
-
-## License
-
-AGPL-3.0-or-later, with additional terms under section 7 in [NOTICE](NOTICE).
+These adapted Amazon patch files are licensed under GPL-3.0-only, consistent with the upstream-derived code. The rest of this repository retains its existing license and notices.
