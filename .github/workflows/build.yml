@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    branches:
+      - port-amazon-morphe-to-reseam
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RESEAM_BIN: ${{ github.workspace }}/engine/reseam
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Install matching Reseam CLI
+        run: |
+          mkdir -p engine
+          version=$(sed -n 's/.*id("app.reseam.workspace") version "\(.*\)".*/\1/p' settings.gradle.kts)
+          curl -fsSL -o engine/reseam "https://cdn.reseam.app/engine/v${version}/reseam-linux-x64"
+          chmod +x engine/reseam
+      - name: Generate temporary signing key
+        run: engine/reseam bundle keygen --out ~/.reseam/bundle-signing.key
+      - name: Build bundle
+        run: ./gradlew bundle --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amazon-reseam-bundle
+          path: build/reseam/*.reseam
+          if-no-files-found: error
