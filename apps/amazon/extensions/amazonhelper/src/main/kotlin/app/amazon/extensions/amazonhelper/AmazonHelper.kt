@@ -117,10 +117,14 @@ fun injectPriceCharts(webView: WebView?, url: String?) {
           b.onclick=function(){
             b.remove();
             var ids={'us':1,'uk':2,'de':3,'fr':4,'jp':5,'ca':6,'it':8,'es':9,'in':10,'mx':11,'br':12,'nl':14};
-            var k=document.createElement('a');k.href='https://keepa.com/#!product/'+(ids[DOMAIN_TOKEN]||1)+'-'+asin;
-            k.textContent='Open Keepa price history';k.target='_blank';k.rel='noopener noreferrer';box.appendChild(k);
-            var c=document.createElement('a');c.href='https://www.camelcamelcamel.com/product/'+asin;
-            c.textContent='Open CamelCamelCamel price history';c.target='_blank';c.rel='noopener noreferrer';c.style.display='block';box.appendChild(c);
+            var k=document.createElement('img');k.referrerPolicy='no-referrer';
+            k.alt='Keepa price history';k.style.cssText='display:block;width:100%;height:auto;margin-top:10px';
+            k.src='https://graph.keepa.com/pricehistory.png?new=1&used=1&amazon=1&domain='+DOMAIN_TOKEN+'&asin='+asin;
+            box.appendChild(k);
+            var c=document.createElement('img');c.referrerPolicy='no-referrer';
+            c.alt='CamelCamelCamel price history';c.style.cssText='display:block;width:100%;height:auto;margin-top:10px';
+            c.src='https://charts.camelcamelcamel.com/'+DOMAIN_TOKEN+'/'+asin+'/amazon-new-used.png?force=1&legend=1&w=625&h=400&tp=1y';
+            box.appendChild(c);
           };
           var target=document.querySelector('#buyBoxAccordion,#corePriceDisplay_desktop_feature_div,#corePrice_feature_div,#unifiedPrice_feature_div,#buybox,#centerCol');
           if(target&&target.parentNode)target.parentNode.insertBefore(box,target.nextSibling);
