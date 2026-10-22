@@ -1,5 +1,5 @@
 [bundle]
-name = "example-patches"
-author = "Your Name"
-description = "Example patches for Reseam"
+name = "amazon-reseam-patches"
+author = "cingxcong"
+description = "Amazon Shopping patches ported from Morphe to Reseam"
 format_version = 1
