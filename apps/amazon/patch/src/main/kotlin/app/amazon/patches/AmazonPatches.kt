@@ -94,12 +94,13 @@ val amazonFixDuplicatePermissions = patch("Fix Amazon manifest conflicts") {
     execute {
         manifest.edit {
             val root = findByTag("manifest").firstOrNull() ?: error("manifest root not found")
-            val prefix = root["package"] + ".reseam."
+            val packageName = root["package"] ?: error("manifest package attribute not found")
+            val prefix = "$packageName.reseam."
             val declarations = listOf("permission", "permission-group", "permission-tree")
             val references = listOf("uses-permission", "uses-permission-sdk-23", "uses-permission-sdk-m")
             val renames = linkedMapOf<String, String>()
             for (tag in declarations) for (element in findByTag(tag)) {
-                val oldName = element["android:name"]
+                val oldName = element["android:name"] ?: continue
                 if (oldName.isBlank() || oldName.startsWith(prefix)) continue
                 val newName = prefix + oldName
                 element["android:name"] = newName
